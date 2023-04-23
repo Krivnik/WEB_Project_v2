@@ -31,10 +31,14 @@ class EditForm(FlaskForm):
 
 class RecipeForm(FlaskForm):
     title = StringField('Название', validators=[DataRequired()])
-    ingredients = [BooleanField(text) for text in
-                   ["Список с ингредиентами"]]
+    ingredient1, ingredient2, ingredient3, ingredient4, ingredient5,\
+        ingredient6, ingredient7, ingredient8, ingredient9, ingredient10,\
+        ingredient11, ingredient12, ingredient13, ingredient14, ingredient15 \
+        = (BooleanField(text) for text in
+           ['Мясо', 'Птица', 'Рыба/Морепродукты', 'Рис', 'Макароны',
+            'Гречневая крупа', 'Картофель', 'Лук', 'Морковь', 'Томаты',
+            'Перец сладкий', 'Грибы', 'Бобовые', 'Орехи', 'Фрукты/ягоды'])
     cooking_time = TimeField('Время приготовления', validators=[DataRequired()])
     content = TextAreaField("Рецепт", validators=[DataRequired()])
-    is_private = BooleanField('Личное')
     image = FileField('Изображение', validators=[DataRequired()])
-    submit = SubmitField('Опубликовать')
+    submit = SubmitField('Сохранить')

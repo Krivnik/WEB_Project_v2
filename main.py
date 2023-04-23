@@ -6,6 +6,7 @@ from data.users import User
 from data.recipes import Recipe
 from forms.user import RegisterForm, LoginForm, EditForm, RecipeForm
 from os import remove
+from datetime import time
 
 app = Flask(__name__)
 api = Api(app)
@@ -39,7 +40,7 @@ def register():
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
-        return redirect('/login')
+        return redirect('/')
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -81,22 +82,24 @@ def edit():
 def add_recipe():
     form = RecipeForm()
     if form.validate_on_submit():
+        ingredients = [form.ingredient1, form.ingredient2, form.ingredient3, form.ingredient4,
+                       form.ingredient5, form.ingredient6, form.ingredient7, form.ingredient8,
+                       form.ingredient9, form.ingredient10, form.ingredient11, form.ingredient12,
+                       form.ingredient13, form.ingredient14, form.ingredient15]
         db_sess = db_session.create_session()
         rs = db_sess.query(Recipe).all()
         n = '1' if not rs else str(int(rs[-1].id) + 1)
         img_name = 'static/img/' + n + '.' + request.files['image'].filename.rsplit('.')[-1]
         recipe = Recipe(
             title=form.title.data,
-            # ingredients=form.ingredients.data,
+            ingredients=''.join([str(int(i.data)) for i in ingredients]),
             cooking_time=form.cooking_time.data.isoformat(timespec='minutes'),
             content=form.content.data,
             image=img_name,
-            is_private=form.is_private.data)
-        current_user.recipes.append(recipe)
-        db_sess.merge(current_user)
+            user_id=current_user.id)
+        db_sess.add(recipe)
         request.files['image'].save(img_name)
         db_sess.commit()
-        # Я знаю об этой ошибке, но пока не смог ее пофиксить
         return redirect('/')
     return render_template('recipe.html', title='Добавление рецепта', form=form)
 
@@ -105,28 +108,33 @@ def add_recipe():
 @login_required
 def edit_recipe(id):
     form = RecipeForm()
+    ingredients = [form.ingredient1, form.ingredient2, form.ingredient3, form.ingredient4,
+                   form.ingredient5, form.ingredient6, form.ingredient7, form.ingredient8,
+                   form.ingredient9, form.ingredient10, form.ingredient11, form.ingredient12,
+                   form.ingredient13, form.ingredient14, form.ingredient15]
     if request.method == "GET":
         db_sess = db_session.create_session()
-        recipe = db_sess.query(Recipe).filter(Recipe.id == id, Recipe.user == current_user).first()
+        recipe = db_sess.query(Recipe).filter(Recipe.id == id,
+                                              Recipe.user_id == current_user.id).first()
         if recipe:
             form.title.data = recipe.title
-            # form.ingredients.data = recipe.ingredients
-            form.cooking_time.data = datetime.time(recipe.cooking_time.split(':'))
+            for i in range(len(ingredients)):
+                ingredients[i].data = int(recipe.ingredients[i])
+            form.cooking_time.data = time(*tuple([int(i) for i in recipe.cooking_time.split(':')]))
             form.content.data = recipe.content
-            form.is_private.data = recipe.is_private
         else:
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        recipe = db_sess.query(Recipe).filter(Recipe.id == id, Recipe.user == current_user).first()
+        recipe = db_sess.query(Recipe).filter(Recipe.id == id,
+                                              Recipe.user_id == current_user.id).first()
         img_name = \
             recipe.image.rsplit('.')[0] + '.' + request.files['image'].filename.rsplit('.')[-1]
         if recipe:
             recipe.title = form.title.data
-            # recipe.ingredients = form.ingredients.data
+            recipe.ingredients = ''.join([str(int(i.data)) for i in ingredients])
             recipe.cooking_time = form.cooking_time.data.isoformat(timespec='minutes')
             recipe.content = form.content.data
-            recipe.is_private = form.is_private.data
             request.files['image'].save(img_name)
             db_sess.commit()
             return redirect('/')
@@ -139,7 +147,7 @@ def edit_recipe(id):
 @login_required
 def recipe_delete(id):
     db_sess = db_session.create_session()
-    recipe = db_sess.query(Recipe).filter(Recipe.id == id, Recipe.user == current_user).first()
+    recipe = db_sess.query(Recipe).filter(Recipe.id == id, Recipe.user_id == current_user.id).first()
     if recipe:
         db_sess.delete(recipe)
         remove(recipe.image)

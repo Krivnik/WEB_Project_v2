@@ -19,7 +19,6 @@ parser.add_argument('ingredients', required=True)
 parser.add_argument('cooking_time', required=True)
 parser.add_argument('content', required=True)
 parser.add_argument('image', required=True)
-parser.add_argument('is_private', required=True, type=bool)
 parser.add_argument('user_id', required=True, type=int)
 
 
@@ -29,7 +28,7 @@ class RecipesResource(Resource):
         session = db_session.create_session()
         recipe = session.query(Recipe).get(recipe_id)
         return jsonify({'recipes': [recipe.to_dict(only=('title', 'ingredients', 'cooking_time',
-                                                         'content', 'user_id', 'is_private'))]})
+                                                         'content', 'user_id'))]})
 
     def delete(self, recipe_id):
         abort_if_recipe_not_found(recipe_id)
@@ -52,7 +51,6 @@ class RecipesResource(Resource):
         recipe.cooking_time = args['cooking_time']
         recipe.content = args['content']
         recipe.image = img_name
-        recipe.is_private = args['is_private']
         recipe.user_id = args['user_id']
         copyfile(args['image'], img_name)
         session.commit()
@@ -64,7 +62,7 @@ class RecipesListResource(Resource):
         session = db_session.create_session()
         recipes = session.query(Recipe).all()
         return jsonify({'recipes': [recipe.to_dict(
-            only=('title', 'ingredients', 'cooking_time', 'content', 'user_id', 'is_private'))
+            only=('title', 'ingredients', 'cooking_time', 'content', 'user_id'))
             for recipe in recipes]})
 
     def post(self):
@@ -79,7 +77,6 @@ class RecipesListResource(Resource):
             cooking_time=args['cooking_time'],
             content=args['content'],
             image=img_name,
-            is_private=args['is_private'],
             user_id=args['user_id'])
         session.add(recipe)
         copyfile(args['image'], img_name)

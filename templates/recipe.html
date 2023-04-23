@@ -14,6 +14,35 @@
                 </p>
             {% endfor %}
         </p>
+        <div>Ингредиенты:</div><br>
+        <table>
+        <tr>
+            <td>{{ form.ingredient1() }} {{ form.ingredient1.label }}</td>
+            <td>{{ form.ingredient6() }} {{ form.ingredient6.label }}</td>
+            <td>{{ form.ingredient11() }} {{ form.ingredient11.label }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.ingredient2() }} {{ form.ingredient2.label }}</td>
+            <td>{{ form.ingredient7() }} {{ form.ingredient7.label }}</td>
+            <td>{{ form.ingredient12() }} {{ form.ingredient12.label }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.ingredient3() }} {{ form.ingredient3.label }}</td>
+            <td>{{ form.ingredient8() }} {{ form.ingredient8.label }}</td>
+            <td>{{ form.ingredient13() }} {{ form.ingredient13.label }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.ingredient4() }} {{ form.ingredient4.label }}</td>
+            <td>{{ form.ingredient9() }} {{ form.ingredient9.label }}</td>
+            <td>{{ form.ingredient14() }} {{ form.ingredient14.label }}</td>
+        </tr>
+        <tr>
+            <td>{{ form.ingredient5() }} {{ form.ingredient5.label }}</td>
+            <td>{{ form.ingredient10() }} {{ form.ingredient10.label }}</td>
+            <td>{{ form.ingredient15() }} {{ form.ingredient15.label }}</td>
+        </tr>
+        </table>
+        <br>
         <p>
             {{ form.cooking_time.label }}<br>
             {{ form.cooking_time(class="form-control") }}<br>
@@ -41,7 +70,6 @@
                 </p>
             {% endfor %}
         </p>
-        <p>{{ form.is_private() }} {{ form.is_private.label }}</p>
         <p>{{ form.submit(type="submit", class="btn btn-dark") }}</p>
         {{message}}
     </form>
