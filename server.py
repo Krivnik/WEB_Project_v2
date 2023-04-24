@@ -189,14 +189,14 @@ def search():
                        form.ingredient5, form.ingredient6, form.ingredient7, form.ingredient8,
                        form.ingredient9, form.ingredient10, form.ingredient11, form.ingredient12,
                        form.ingredient13, form.ingredient14, form.ingredient15]
-        return redirect(f"/search/{form.title.data}/"
+        return redirect(f"/search/{form.title.data}."
                         f"{''.join([str(int(i.data)) for i in ingredients])}")
     return render_template('search.html', title='Поиск', form=form)
 
 
-@app.route('/search/<string:title>/<string:ingredients>')
+@app.route('/search/<string:title>.<string:ingredients>')
 def show_results(title, ingredients):
-    ingredients = str(['_' for i in ingredients if i == '0'])
+    ingredients = ''.join(['_' if i == '0' else '1' for i in ingredients])
     db_sess = db_session.create_session()
     recipes = db_sess.query(Recipe).filter(Recipe.title.like(f'%{title}%'),
                                            Recipe.ingredients.like(ingredients)).all()
