@@ -5,7 +5,7 @@ from data import db_session, recipes_api, users_api
 from data.users import User
 from data.recipes import Recipe
 from forms.user import RegisterForm, LoginForm, EditForm, RecipeForm, SearchForm
-from os import remove
+from os import remove, environ
 from datetime import time
 from PIL import Image
 
@@ -227,4 +227,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    port = int(environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
