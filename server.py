@@ -223,9 +223,9 @@ def main():
     api.add_resource(recipes_api.RecipesResource, '/api/recipes/<int:recipe_id>')
     api.add_resource(users_api.UsersListResource, '/api/users')
     api.add_resource(users_api.UsersResource, '/api/users/<int:user_id>')
-    app.run()
+    port = int(environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
-    port = int(environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    main()
