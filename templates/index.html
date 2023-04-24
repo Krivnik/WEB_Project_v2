@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="container py-5">
+    {% if undertitle != 'Результаты поиска' and current_user.is_authenticated %}
+    <a href="/recipes" class="btn btn-dark">Добавить рецепт</a><br><br>
+    {% endif %}
+    <h2>{{ undertitle }}</h2>
+    {% for item in recipes %}
+    <br>
+    <div class="col-md-6 border rounded">
+        <br>
+        <img src={{ item.image }}>
+        <h3>{{ item.title }}</h3>
+        <div>
+            {% set ingredients=['Мясо', 'Птица', 'Рыба/Морепродукты', 'Рис', 'Макароны',
+            'Гречневая крупа', 'Картофель', 'Лук', 'Морковь', 'Томаты', 'Перец сладкий', 'Грибы',
+            'Бобовые', 'Орехи', 'Фрукты/ягоды'] %}
+            Ингредиенты:
+            <ul>
+            {% for i in range(15) %}
+            {% if item.ingredients[i] == '1' %}
+                <li>{{ ingredients[i] }}</li>
+            {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+        <div>Время приготовления: {{ item.cooking_time }}</div>
+        <br>
+        <div>Рецепт:</div>
+        <div>{{ item.content }}</div>
+        <br>
+        {% if current_user.is_authenticated and current_user.id == item.user_id %}
+        <div>
+            <a href="/recipes/{{ item.id }}" class="btn btn-dark">
+                Редактировать
+            </a>
+            <a href="/recipes_delete/{{ item.id }}" class="btn btn-dark">
+                Удалить
+            </a>
+        </div>
+        {% endif %}
+        <br>
+    </div>
+    {% endfor %}
+</main>
+{% endblock %}

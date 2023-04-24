@@ -4,6 +4,7 @@ from .recipes import Recipe
 from flask import jsonify
 from shutil import copyfile
 from os import remove
+from PIL import Image
 
 
 def abort_if_recipe_not_found(recipe_id):
@@ -53,6 +54,9 @@ class RecipesResource(Resource):
         recipe.image = img_name
         recipe.user_id = args['user_id']
         copyfile(args['image'], img_name)
+        img = Image.open(img_name)
+        img.thumbnail(size=(525, 525))
+        img.save(img_name)
         session.commit()
         return jsonify({'success': 'OK'})
 
@@ -80,5 +84,8 @@ class RecipesListResource(Resource):
             user_id=args['user_id'])
         session.add(recipe)
         copyfile(args['image'], img_name)
+        img = Image.open(img_name)
+        img.thumbnail(size=(525, 525))
+        img.save(img_name)
         session.commit()
         return jsonify({'success': 'OK'})

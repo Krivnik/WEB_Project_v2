@@ -4,9 +4,10 @@ from flask_restful import Api
 from data import db_session, recipes_api, users_api
 from data.users import User
 from data.recipes import Recipe
-from forms.user import RegisterForm, LoginForm, EditForm, RecipeForm
+from forms.user import RegisterForm, LoginForm, EditForm, RecipeForm, SearchForm
 from os import remove
 from datetime import time
+from PIL import Image
 
 app = Flask(__name__)
 api = Api(app)
@@ -40,7 +41,7 @@ def register():
         user.set_password(form.password.data)
         db_sess.add(user)
         db_sess.commit()
-        return redirect('/')
+        return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
 
@@ -77,11 +78,22 @@ def edit():
     return render_template('edit.html', title='Редактирование данных', form=form)
 
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
 @app.route('/recipes', methods=['GET', 'POST'])
 @login_required
 def add_recipe():
     form = RecipeForm()
     if form.validate_on_submit():
+        if request.files['image'].filename.rsplit('.')[-1] not in ['jpg', 'jpeg', 'png', 'bmp']:
+            return render_template('recipe.html', title='Добавление рецепта', form=form,
+                                   message='Выбранный файл не является изображением, '
+                                           'либо не поддерживается сайтом')
         ingredients = [form.ingredient1, form.ingredient2, form.ingredient3, form.ingredient4,
                        form.ingredient5, form.ingredient6, form.ingredient7, form.ingredient8,
                        form.ingredient9, form.ingredient10, form.ingredient11, form.ingredient12,
@@ -99,6 +111,9 @@ def add_recipe():
             user_id=current_user.id)
         db_sess.add(recipe)
         request.files['image'].save(img_name)
+        img = Image.open(img_name)
+        img.thumbnail(size=(525, 525))
+        img.save(img_name)
         db_sess.commit()
         return redirect('/')
     return render_template('recipe.html', title='Добавление рецепта', form=form)
@@ -125,17 +140,26 @@ def edit_recipe(id):
         else:
             abort(404)
     if form.validate_on_submit():
+        if request.files['image'].filename.rsplit('.')[-1] not in ['jpg', 'jpeg', 'png', 'bmp']:
+            return render_template('recipe.html', title='Добавление рецепта', form=form,
+                                   message='Выбранный файл не является изображением, '
+                                           'либо не поддерживается сайтом')
         db_sess = db_session.create_session()
         recipe = db_sess.query(Recipe).filter(Recipe.id == id,
                                               Recipe.user_id == current_user.id).first()
         img_name = \
             recipe.image.rsplit('.')[0] + '.' + request.files['image'].filename.rsplit('.')[-1]
         if recipe:
+            remove(recipe.image)
             recipe.title = form.title.data
             recipe.ingredients = ''.join([str(int(i.data)) for i in ingredients])
             recipe.cooking_time = form.cooking_time.data.isoformat(timespec='minutes')
             recipe.content = form.content.data
+            recipe.image = img_name
             request.files['image'].save(img_name)
+            img = Image.open(img_name)
+            img.thumbnail(size=(525, 525))
+            img.save(img_name)
             db_sess.commit()
             return redirect('/')
         else:
@@ -157,16 +181,35 @@ def recipe_delete(id):
     return redirect('/')
 
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect("/")
+@app.route('/search')
+def search():
+    form = SearchForm()
+    if form.validate_on_submit():
+        ingredients = [form.ingredient1, form.ingredient2, form.ingredient3, form.ingredient4,
+                       form.ingredient5, form.ingredient6, form.ingredient7, form.ingredient8,
+                       form.ingredient9, form.ingredient10, form.ingredient11, form.ingredient12,
+                       form.ingredient13, form.ingredient14, form.ingredient15]
+        return redirect(f"/search/{form.title.data}/"
+                        f"{''.join([str(int(i.data)) for i in ingredients])}")
+    return render_template('search.html', title='Поиск', form=form)
+
+
+@app.route('/search/<string:title>/<string:ingredients>')
+def show_results(title, ingredients):
+    ingredients = str(['_' for i in ingredients if i == '0'])
+    db_sess = db_session.create_session()
+    recipes = db_sess.query(Recipe).filter(Recipe.title.like(f'%{title}%'),
+                                           Recipe.ingredients.like(ingredients)).all()
+    return render_template('index.html', title='Результаты поиска', recipes=recipes,
+                           undertitle='Результаты поиска')
 
 
 @app.route('/')
 def index():
-    return render_template('main_page.html', title='Главная')
+    db_sess = db_session.create_session()
+    recipes = reversed(db_sess.query(Recipe).all())
+    return render_template('index.html', title='Главная', recipes=recipes,
+                           undertitle='Последние рецепты')
 
 
 @app.route('/about')

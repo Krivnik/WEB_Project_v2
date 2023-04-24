@@ -31,8 +31,8 @@ class EditForm(FlaskForm):
 
 class RecipeForm(FlaskForm):
     title = StringField('Название', validators=[DataRequired()])
-    ingredient1, ingredient2, ingredient3, ingredient4, ingredient5,\
-        ingredient6, ingredient7, ingredient8, ingredient9, ingredient10,\
+    ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
+        ingredient6, ingredient7, ingredient8, ingredient9, ingredient10, \
         ingredient11, ingredient12, ingredient13, ingredient14, ingredient15 \
         = (BooleanField(text) for text in
            ['Мясо', 'Птица', 'Рыба/Морепродукты', 'Рис', 'Макароны',
@@ -42,3 +42,15 @@ class RecipeForm(FlaskForm):
     content = TextAreaField("Рецепт", validators=[DataRequired()])
     image = FileField('Изображение', validators=[DataRequired()])
     submit = SubmitField('Сохранить')
+
+
+class SearchForm(FlaskForm):
+    title = StringField('Название', validators=[DataRequired()])
+    ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, \
+        ingredient6, ingredient7, ingredient8, ingredient9, ingredient10, \
+        ingredient11, ingredient12, ingredient13, ingredient14, ingredient15 \
+        = (BooleanField(text) for text in
+           ['Мясо', 'Птица', 'Рыба/Морепродукты', 'Рис', 'Макароны',
+            'Гречневая крупа', 'Картофель', 'Лук', 'Морковь', 'Томаты',
+            'Перец сладкий', 'Грибы', 'Бобовые', 'Орехи', 'Фрукты/ягоды'])
+    submit = SubmitField('Поиск 🔍')
