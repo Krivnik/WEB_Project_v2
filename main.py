@@ -181,7 +181,7 @@ def recipe_delete(id):
     return redirect('/')
 
 
-@app.route('/search')
+@app.route('/search', methods=['GET', 'POST'])
 def search():
     form = SearchForm()
     if form.validate_on_submit():
